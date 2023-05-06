@@ -1,0 +1,5 @@
+package another
+
+func AnotherFunction() {
+
+}
