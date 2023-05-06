@@ -8,17 +8,6 @@ import (
 	"strings"
 )
 
-func Share(src any, code any) {
-
-}
-func Bind(src any, dest any) {
-
-}
-
-func Build(src any) {
-
-}
-
 func removeDuplicateStr(strSlice []string) []string {
 	allKeys := make(map[string]bool)
 	list := []string{}
