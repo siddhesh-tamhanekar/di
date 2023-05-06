@@ -2,8 +2,7 @@
 
 This library generates constructor functions with dependancy code for struct and interfaces.
 
-The library is inspired by google [wire](https://github.com/google/wire) framework
-
+The library is inspired by google [wire](https://github.com/google/wire)
 #### Getting Started
 
 Download and install using following commands
