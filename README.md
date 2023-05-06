@@ -9,7 +9,7 @@ Download and install using following commands
 
 `go get github.com/siddhesh-tamhanekar/di`
 
-`go install github.com/siddhesh-tamhanekar/di`
+`go install github.com/siddhesh-tamhanekar/di/cmd/di`
 
 
 Execute following command for generating dependancies in your project.
