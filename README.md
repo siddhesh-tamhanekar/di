@@ -7,7 +7,7 @@ The library is inspired by google [wire](https://github.com/google/wire)
 
 Download and install using following commands
 
-`go get github.com/siddhesh-tamhanekar/di`
+`go get github.com/siddhesh-tamhanekar/di@v0.0.3`
 
 `go install github.com/siddhesh-tamhanekar/di/cmd/di`
 
@@ -38,6 +38,7 @@ Execute following command for generating dependancies in your project.
 |  Share  | `di.Share(yourStruct{},db)`<br> the second parameter is the package level variable which need to use while resolving dependancy it will act like a signleton|
 |  Build |  `di.Build(yourStruct{})` <br> build method will create constructor function for given struct|
 |  Bind | `di.Bind(yourInterface, targetStruct{}`<br> this will bind Interface to struct  |
+|  BindEnv | `di.Bind(yourInterface, targetStruct{},env)`<br> this will bind Interface to struct  when ENV environment variable is set to env string |
 
 
 #### Conventions
