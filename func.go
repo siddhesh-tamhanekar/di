@@ -7,6 +7,10 @@ func Bind(src any, dest any) {
 
 }
 
+func BindEnv(src any, dest any, env string) {
+
+}
+
 func Build(src any) {
 
 }

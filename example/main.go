@@ -1,6 +1,7 @@
 package example
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/siddhesh-tamhanekar/di/example/another/b"
@@ -12,6 +13,10 @@ type Db struct {
 
 type UserServicer interface {
 	process()
+}
+
+type Writer interface {
+	write(s string) bool
 }
 
 type Redis struct {
@@ -35,12 +40,29 @@ type UserService struct {
 }
 
 func (u *UserService) process() {
+}
 
+func NewUserService() UserService {
+	return UserService{}
+}
+
+type TestUserService struct {
+	UserRepo UserRepo
+}
+
+func (u *TestUserService) process() {
+}
+
+type FileWriter struct{}
+
+func (f FileWriter) write(s string) bool {
+	return true
 }
 
 type UserHandler struct {
 	ConfigRepo   *ConfigRepo
-	UserServicer UserService
+	UserServicer UserServicer
+	w            Writer
 	B            *b.B2
 	B1           *b.B1
 }
@@ -51,17 +73,15 @@ func main() {
 	db = Db{
 		dsn: "dsn://",
 	}
-	// b := true
-	// // str := "ab"
 	a := NewUserHandler("", []string{"a"})
 	fmt.Println(a.B1)
 }
 
-// func NewUserRepo() (userRepo *UserRepo, err error) {
-// 	if db.dsn != "123" {
-// 		return nil, errors.New("db dsn incorrect")
-// 	}
-// 	return &UserRepo{
-// 		DB: db,
-// 	}, nil
-// }
+func NewUserRepo() (userRepo *UserRepo, err error) {
+	if db.dsn != "123" {
+		return nil, errors.New("db dsn incorrect")
+	}
+	return &UserRepo{
+		Db: &db,
+	}, nil
+}

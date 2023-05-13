@@ -17,4 +17,6 @@ func build() {
 	di.Build(UserHandler{})
 
 	di.Bind(UserServicer, UserService{})
+	di.Bind(Writer, FileWriter{})
+	di.BindEnv(UserServicer, TestUserService{}, "test")
 }
