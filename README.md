@@ -38,7 +38,7 @@ Execute following command for generating dependancies in your project.
 |  Share  | `di.Share(yourStruct{},db)`<br> the second parameter is the package level variable which need to use while resolving dependancy it will act like a signleton|
 |  Build |  `di.Build(yourStruct{})` <br> build method will create constructor function for given struct|
 |  Bind | `di.Bind(yourInterface, targetStruct{}`<br> this will bind Interface to struct  |
-|  BindEnv | `di.Bind(yourInterface, targetStruct{},env)`<br> this will bind Interface to struct  when ENV environment variable is set to env string |
+|  BindEnv | `di.BindEnv(yourInterface, targetStruct{},env)`<br> this will bind Interface to struct  when ENV environment variable is set to env string |
 
 
 #### Conventions
