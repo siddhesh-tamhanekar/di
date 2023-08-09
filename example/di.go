@@ -12,9 +12,11 @@ func NewUserHandler() UserHandler {
 func build() {
 	di.Share(Db{}, db)
 	di.Share(Redis{}, NewRedis())
-	// di.Share(b.B1{}, b.Bin())
+	di.Share(b.B1{}, b.Bin())
 
 	di.Build(UserHandler{})
+
+	di.Singlton(Redis{}, NewRedis())
 
 	di.Bind(UserServicer, UserService{})
 	di.Bind(Writer, FileWriter{})

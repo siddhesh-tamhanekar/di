@@ -18,8 +18,7 @@ Execute following command for generating dependancies in your project.
 
 #### Running Example from source code
 
-`go run .`
-
+`go run cmd/di/main.go`
 
 ---
 
@@ -29,7 +28,7 @@ Execute following command for generating dependancies in your project.
 - `go:build exclude` to ignore di.go while compiling project.
 - This file will contain the code which tells library about how the dependancies should be resolved.
 - we can use the library methods (mentioned below) to declare the ependancies.
-- Once di.go is ready we can run `<goroot>/bin/di.go` to generate dependancies.
+- Once di.go is ready we can run `<goroot>/bin/di` to generate dependancies.
 - Refer example directory for more details.
 
 #### Methods
@@ -38,7 +37,7 @@ Execute following command for generating dependancies in your project.
 |  Share  | `di.Share(yourStruct{},db)`<br> the second parameter is the package level variable which need to use while resolving dependancy it will act like a signleton|
 |  Build |  `di.Build(yourStruct{})` <br> build method will create constructor function for given struct|
 |  Bind | `di.Bind(yourInterface, targetStruct{}`<br> this will bind Interface to struct  |
-|  BindEnv | `di.BindEnv(yourInterface, targetStruct{},env)`<br> this will bind Interface to struct  when ENV environment variable is set to env string |
+|  BindEnv | `di.BindEnv(yourInterface, targetStruct{},env)`<br> this will bind Interface to struct  when ENV environment variable is set to env string. if you use this method then while dependency generation run `export ENV=<env string> && ~/go/bin/di `|
 
 
 #### Conventions
@@ -46,6 +45,10 @@ All the functions generated with `Build` method call will start with `New` keywo
 
 All the functions genertated with `Bind` method call will start with `New` keyword followed by interface name for e.g. generated function for `UserCreator` interface will be `New UserCreator() UserCreator`
 
+#### Roadmap
+- Singleton Pattern Generation
+- Use AST to generate code
+- Use of goroutine wherever required.
+
 #### Closing Thoughts
 This library is still in beta and needs to handle the edge case scenerios. pls feel free to open issues and pull request to enrich the library.
-

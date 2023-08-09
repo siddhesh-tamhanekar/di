@@ -1,9 +1,6 @@
 package example
 
 import (
-	"errors"
-	"fmt"
-
 	"github.com/siddhesh-tamhanekar/di/example/another/b"
 )
 
@@ -26,6 +23,10 @@ func NewRedis() Redis {
 	return Redis{}
 }
 
+func NewInt() int {
+	return 123213
+}
+
 type UserRepo struct {
 	Db    *Db
 	Redis Redis
@@ -42,9 +43,9 @@ type UserService struct {
 func (u *UserService) process() {
 }
 
-func NewUserService() UserService {
-	return UserService{}
-}
+// func NewUserService() UserService {
+// 	return UserService{}
+// }
 
 type TestUserService struct {
 	UserRepo UserRepo
@@ -73,15 +74,15 @@ func main() {
 	db = Db{
 		dsn: "dsn://",
 	}
-	a := NewUserHandler("", []string{"a"})
-	fmt.Println(a.B1)
+	// a := NewUserHandler("", []string{"a"})
+	// fmt.Println(a.B1)
 }
 
-func NewUserRepo() (userRepo *UserRepo, err error) {
-	if db.dsn != "123" {
-		return nil, errors.New("db dsn incorrect")
-	}
-	return &UserRepo{
-		Db: &db,
-	}, nil
-}
+// func NewUserRepo() (userRepo *UserRepo, err error) {
+// 	if db.dsn != "123" {
+// 		return nil, errors.New("db dsn incorrect")
+// 	}
+// 	return &UserRepo{
+// 		Db: &db,
+// 	}, nil
+// }
