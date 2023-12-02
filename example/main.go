@@ -1,8 +1,30 @@
 package example
 
 import (
+	"net/http"
+
 	"github.com/siddhesh-tamhanekar/di/example/another/b"
+	"gorm.io/gorm"
 )
+
+type Notification interface {
+	Send(msg string) bool
+}
+
+type SmsNotification struct {
+}
+
+func (s *SmsNotification) Send(msg string) bool {
+	return true
+}
+
+type GcmNotification struct {
+	redis Redis
+}
+
+func (s *GcmNotification) Send(msg string) bool {
+	return true
+}
 
 type Db struct {
 	dsn string
@@ -19,12 +41,12 @@ type Writer interface {
 type Redis struct {
 }
 
-func NewRedis() Redis {
-	return Redis{}
+func NewRedis() (*Redis, error) {
+	return &Redis{}, nil
 }
 
-func NewInt() int {
-	return 123213
+func NewDb() *Db {
+	return &Db{}
 }
 
 type UserRepo struct {
@@ -54,7 +76,9 @@ type TestUserService struct {
 func (u *TestUserService) process() {
 }
 
-type FileWriter struct{}
+type FileWriter struct {
+	fname string
+}
 
 func (f FileWriter) write(s string) bool {
 	return true
@@ -64,18 +88,52 @@ type UserHandler struct {
 	ConfigRepo   *ConfigRepo
 	UserServicer UserServicer
 	w            Writer
-	B            *b.B2
-	B1           *b.B1
+	B            b.B2
+	B1           *b.B122
 }
 
-var db Db
+var db *gorm.DB
+
+type Foo struct {
+	Name string
+	B1   b.B1
+}
+
+// func NewFoo(name string) (Foo, error) {
+// 	return Foo{name}, nil
+// }
+
+type Simple struct {
+	age   []int
+	marks map[string]int
+	C     *http.Request
+	Foo   *Foo
+	W     Writer
+}
 
 func main() {
-	db = Db{
-		dsn: "dsn://",
-	}
-	// a := NewUserHandler("", []string{"a"})
-	// fmt.Println(a.B1)
+
+	// var s []UserServicer
+	// us, _ := NewwUserServicer()
+	// s = append(s, us)
+	// fmt.Println(s)
+}
+
+type Logger struct {
+	file string
+}
+type Infra struct {
+	Db     *gorm.DB
+	Logger Logger
+}
+
+type Bar struct {
+	Baz    string
+	Logger Logger
+}
+type FooService struct {
+	Infra
+	Bar Bar
 }
 
 // func NewUserRepo() (userRepo *UserRepo, err error) {

@@ -3,20 +3,29 @@
 package example
 
 import (
-	di "di/lib"
+	"github.com/siddhesh-tamhanekar/di"
+	"github.com/siddhesh-tamhanekar/di/example/another/"
+	"github.com/siddhesh-tamhanekar/di/example/another/b"
 )
 
 func NewUserHandler() UserHandler {
 }
 
 func build() {
-	di.Share(Db{}, db)
-	di.Share(Redis{}, NewRedis())
-	di.Share(b.B1{}, b.Bin())
+	// di.Share(Db{}, db)
+	// di.Share(b.B1{}, b.Bin())
+	di.Singleton(Redis{}, NewRedis())
 
 	di.Build(UserHandler{})
-
-	di.Singlton(Redis{}, NewRedis())
+	di.Build(b.B1{})
+	di.Build(Simple{})
+	di.Build(FooService{})
+	di.Bind(Notification, map[string]any{
+		"sms":   SmsNotification{},
+		"gcm":   GcmNotification{},
+		"email": another.EmailNotification{},
+	})
+	di.Singleton(Db{}, NewDb())
 
 	di.Bind(UserServicer, UserService{})
 	di.Bind(Writer, FileWriter{})

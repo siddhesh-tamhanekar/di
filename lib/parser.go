@@ -23,6 +23,7 @@ type Interface struct {
 	File    *CodeFile
 	Name    string
 	Methods []*Method
+	Ast     *ast.TypeSpec
 }
 
 type Type struct {
@@ -43,12 +44,13 @@ type Method struct {
 	Params   []*Type
 	Results  []*Type
 	Reciever *Type
+	Ast      *ast.FuncDecl
 }
 
 type Struct struct {
-	Name   string
-	File   *CodeFile
-	Fields []*Field
+	Name string
+	File *CodeFile
+	Ast  *ast.TypeSpec
 }
 type ParseVisitor struct {
 	v    int
@@ -107,6 +109,7 @@ func (v ParseVisitor) Visit(n ast.Node) ast.Visitor {
 			File:    v.file,
 			Params:  getTypes(f.Type.Params),
 			Results: getTypes(f.Type.Results),
+			Ast:     f,
 		}
 		ts := getTypes(f.Recv)
 
@@ -120,24 +123,27 @@ func (v ParseVisitor) Visit(n ast.Node) ast.Visitor {
 		sType, ok := tSpec.Type.(*ast.StructType)
 		if ok {
 			s := Struct{
-				Name:   tSpec.Name.Name,
-				File:   v.file,
-				Fields: make([]*Field, 0),
+				Name: tSpec.Name.Name,
+				File: v.file,
+				Ast:  tSpec,
 			}
 			for _, f := range sType.Fields.List {
 				fset := token.NewFileSet()
 				buf := new(strings.Builder)
 				printer.Fprint(buf, fset, f.Type)
-
+				// spew.Dump(f)
+				n := ""
+				if len(f.Names) > 0 {
+					n = f.Names[0].Name
+				}
 				fs := Field{
 					Struct: &s,
-					Name:   f.Names[0].Name,
+					Name:   n,
 					Type:   buf.String(),
 				}
 				if f.Tag != nil {
 					fs.Tag = f.Tag.Value
 				}
-				s.Fields = append(s.Fields, &fs)
 			}
 			v.file.Structs = append(v.file.Structs, &s)
 
@@ -146,6 +152,7 @@ func (v ParseVisitor) Visit(n ast.Node) ast.Visitor {
 		if ok {
 			s := Interface{
 				Name:    tSpec.Name.Name,
+				Ast:     tSpec,
 				File:    v.file,
 				Methods: make([]*Method, 0),
 			}
