@@ -62,8 +62,8 @@ func (s *SingletonBuilder) Add(src string, pkg *Package) {
 		panic("method used for singleton should not have any parameters" + method.Name)
 	}
 	s.SingletonMethods = append(s.SingletonMethods, &Method{
-		Name:    fnName,
-		Results: method.Results,
+		Name: fnName,
+		// Results: method.Results,
 		Ast: &ast.FuncDecl{
 			Name: ast.NewIdent(fnName),
 			Type: method.Ast.Type,

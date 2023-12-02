@@ -10,11 +10,7 @@ import (
 )
 
 var Generators []Generator
-var GlobalScope *Scope
 
-func init() {
-	GlobalScope = NewScope("global")
-}
 func CreateGenerator(method string) Generator {
 	if method == "Build" {
 		return &StructGenerator{}
@@ -120,7 +116,6 @@ func (ig *InterfaceGenerator) ParseDeclaration(n ast.Node, pkg string) {
 
 func (ig *InterfaceGenerator) Generate() (*ast.FuncDecl, string) {
 	if ig.isEnvBased && os.Getenv("ENV") != ig.env {
-		// fmt.Println("returning", v)
 		return nil, ""
 	}
 	fn := &ast.FuncDecl{
@@ -134,9 +129,9 @@ func (ig *InterfaceGenerator) Generate() (*ast.FuncDecl, string) {
 		},
 	}
 	if ig.elts == nil {
-		s, _ := GetStructOrInterface(ig.src, ig.pkg)
+		s := GetStruct(ig.src, ig.pkg)
 
-		_, i := GetStructOrInterface(ig.inter, ig.pkg)
+		i := GetInterface(ig.inter, ig.pkg)
 
 		if len(i.Methods) > 0 {
 			n := i.Methods[0].Name
@@ -177,9 +172,9 @@ func (ig *InterfaceGenerator) Generate() (*ast.FuncDecl, string) {
 			}
 
 			// handle package logic later
-			s, _ := GetStructOrInterface(stName, pkgname)
+			s := GetStruct(stName, pkgname)
 
-			_, i := GetStructOrInterface(ig.inter, ig.pkg)
+			i := GetInterface(ig.inter, ig.pkg)
 			if s == nil {
 				log.Panic("struct pkg " + pkgname + " " + stName + " doesnt found for bidning with " + ig.inter + " method")
 			}
@@ -283,7 +278,7 @@ func (sg *StructGenerator) Generate() (*ast.FuncDecl, string) {
 			List: []ast.Stmt{},
 		},
 	}
-	s, _ := GetStructOrInterface(sg.src, sg.pkg)
+	s := GetStruct(sg.src, sg.pkg)
 	CreateStruct(s, fn, pkgs[sg.pkg], nil)
 	// os.Exit(0)
 	return fn, sg.pkg
@@ -359,7 +354,7 @@ func CreateStruct(st *Struct, fn *ast.FuncDecl, pkg *Package, prevStruct *Struct
 				}
 				fn.Type.Params.List = append(fn.Type.Params.List, param)
 			}
-			addStatement(fn, fncall.(*ast.AssignStmt))
+			fn.Body.List = append(fn.Body.List, fncall.(*ast.AssignStmt))
 
 			for _, v := range method.Ast.Type.Results.List {
 
@@ -399,11 +394,11 @@ func CreateStruct(st *Struct, fn *ast.FuncDecl, pkg *Package, prevStruct *Struct
 							},
 						},
 					}
-					addStatement(fn, smt)
+					fn.Body.List = append(fn.Body.List, smt)
 				}
 			}
 		} else {
-			s, i := GetStructOrInterface(getName(field.Type), pkgname)
+			s := GetStruct(getName(field.Type), pkgname)
 			if s != nil {
 				value = ast.NewIdent(getVarName(getName(field.Type)))
 				CreateStruct(s, fn, pkg, st)
@@ -417,36 +412,39 @@ func CreateStruct(st *Struct, fn *ast.FuncDecl, pkg *Package, prevStruct *Struct
 					}
 				}
 
-			} else if i != nil {
-				value = ast.NewIdent(getVarName(getName(field.Type)))
-				// if interface is type of one of field resolve it to given src.
-				generator := GetGenerator(i.Name)
-				if generator == nil {
-					panic("Interface to Implemenation not found forr " + i.Name)
-				}
-				is, _ := GetStructOrInterface(generator.(*InterfaceGenerator).src, pkgname)
-				if is != nil {
-					CreateStruct(is, fn, pkg, st)
-				}
-				value = &ast.UnaryExpr{
-					X:  ast.NewIdent(getVarName(is.Name)),
-					Op: token.AND,
-				}
-
 			} else {
-				// unknown types needs to be accept as parameter.
-				for _, v := range fn.Type.Params.List {
-					if v.Names[0].Name == getName(value) {
-						value = ast.NewIdent(getVarName(st.Ast.Name.Name) + strings.Title(v.Names[0].Name))
-					}
-				}
-				param := &ast.Field{
-					Names: []*ast.Ident{ast.NewIdent(getName(value))},
-					Type:  field.Type,
-				}
-				fn.Type.Params.List = append(fn.Type.Params.List, param)
-			}
+				i := GetInterface(getName(field.Type), pkgname)
+				if i != nil {
 
+					value = ast.NewIdent(getVarName(getName(field.Type)))
+					// if interface is type of one of field resolve it to given src.
+					generator := GetGenerator(i.Name)
+					if generator == nil {
+						panic("Interface to Implemenation not found forr " + i.Name)
+					}
+					is := GetStruct(generator.(*InterfaceGenerator).src, pkgname)
+					if is != nil {
+						CreateStruct(is, fn, pkg, st)
+					}
+					value = &ast.UnaryExpr{
+						X:  ast.NewIdent(getVarName(is.Name)),
+						Op: token.AND,
+					}
+
+				} else {
+					// unknown types needs to be accept as parameter.
+					for _, v := range fn.Type.Params.List {
+						if v.Names[0].Name == getName(value) {
+							value = ast.NewIdent(getVarName(st.Ast.Name.Name) + strings.Title(v.Names[0].Name))
+						}
+					}
+					param := &ast.Field{
+						Names: []*ast.Ident{ast.NewIdent(getName(value))},
+						Type:  field.Type,
+					}
+					fn.Type.Params.List = append(fn.Type.Params.List, param)
+				}
+			}
 		}
 
 		name := getName(field.Type)
@@ -504,10 +502,10 @@ func CreateStruct(st *Struct, fn *ast.FuncDecl, pkg *Package, prevStruct *Struct
 		}
 	}
 	// add body statements
-	addStatement(fn, stmt)
-	if prevStruct == nil {
-		addStatement(fn, &ast.ReturnStmt{})
+	fn.Body.List = append(fn.Body.List, stmt)
 
+	if prevStruct == nil {
+		fn.Body.List = append(fn.Body.List, &ast.ReturnStmt{})
 	}
 }
 
@@ -633,8 +631,4 @@ func (sg *SingletonGenerator) Generate() (*ast.FuncDecl, string) {
 	pkgs[sg.pkg].singleton.Add(sg.src, pkgs[sg.pkg])
 
 	return nil, sg.pkg
-}
-
-func addStatement(fn *ast.FuncDecl, stmt ast.Stmt) {
-	fn.Body.List = append(fn.Body.List, stmt)
 }

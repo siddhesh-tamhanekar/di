@@ -12,34 +12,38 @@ import (
 
 var pkgs map[string]*Package
 
-func GetStructOrInterface(s string, p string) (*Struct, *Interface) {
+func GetStruct(s string, p string) *Struct {
 	pkg, ok := pkgs[p]
 	if ok {
 
 		for _, st := range pkg.Structs {
 			if st.Name == s {
-				return st, nil
-			}
-		}
-		for _, st := range pkg.Interfaces {
-			if st.Name == s {
-				return nil, st
+				return st
 			}
 		}
 	}
 
-	return nil, nil
+	return nil
+}
+
+func GetInterface(s string, p string) *Interface {
+	pkg, ok := pkgs[p]
+	if ok {
+		for _, st := range pkg.Interfaces {
+			if st.Name == s {
+				return st
+			}
+		}
+	}
+	return nil
 }
 
 func GetStructMethod(s string, method string, packageName string) *Method {
 	pkg, ok := pkgs[packageName]
 	if ok {
 		for _, v := range pkg.Methods {
-			if v.Name == method && v.Reciever != nil {
-				recv := v.Reciever.T
-				if recv[0:1] == "*" && recv[1:] == s {
-					return v
-				} else if recv == s {
+			if v.Name == method && v.Ast.Recv != nil && len(v.Ast.Recv.List) != 0 {
+				if s == getName(v.Ast.Recv.List[0].Type) {
 					return v
 				}
 			}
@@ -52,7 +56,7 @@ func GetMethod(method string, packageName string) *Method {
 	pkg, ok := pkgs[packageName]
 	if ok {
 		for _, v := range pkg.Methods {
-			if v.Name == method && v.Reciever == nil {
+			if v.Name == method && (v.Ast.Recv == nil) {
 				return v
 			}
 		}

@@ -31,20 +31,10 @@ type Type struct {
 	T    string
 }
 
-type Field struct {
-	Struct *Struct
-	Name   string
-	Type   string
-	Tag    string
-}
-
 type Method struct {
-	File     *CodeFile
-	Name     string
-	Params   []*Type
-	Results  []*Type
-	Reciever *Type
-	Ast      *ast.FuncDecl
+	File *CodeFile
+	Name string
+	Ast  *ast.FuncDecl
 }
 
 type Struct struct {
@@ -105,16 +95,9 @@ func (v ParseVisitor) Visit(n ast.Node) ast.Visitor {
 	case *ast.FuncDecl:
 		f := n.(*ast.FuncDecl)
 		m := Method{
-			Name:    f.Name.Name,
-			File:    v.file,
-			Params:  getTypes(f.Type.Params),
-			Results: getTypes(f.Type.Results),
-			Ast:     f,
-		}
-		ts := getTypes(f.Recv)
-
-		if len(ts) > 0 {
-			m.Reciever = ts[0]
+			Name: f.Name.Name,
+			File: v.file,
+			Ast:  f,
 		}
 
 		v.file.Methods = append(v.file.Methods, &m)
@@ -132,18 +115,7 @@ func (v ParseVisitor) Visit(n ast.Node) ast.Visitor {
 				buf := new(strings.Builder)
 				printer.Fprint(buf, fset, f.Type)
 				// spew.Dump(f)
-				n := ""
-				if len(f.Names) > 0 {
-					n = f.Names[0].Name
-				}
-				fs := Field{
-					Struct: &s,
-					Name:   n,
-					Type:   buf.String(),
-				}
-				if f.Tag != nil {
-					fs.Tag = f.Tag.Value
-				}
+
 			}
 			v.file.Structs = append(v.file.Structs, &s)
 
@@ -157,12 +129,9 @@ func (v ParseVisitor) Visit(n ast.Node) ast.Visitor {
 				Methods: make([]*Method, 0),
 			}
 			for _, f := range iType.Methods.List {
-				m, ok := f.Type.(*ast.FuncType)
 				if ok {
 					fs := Method{
-						Name:    f.Names[0].Name,
-						Params:  getTypes(m.Params),
-						Results: getTypes(m.Results),
+						Name: f.Names[0].Name,
 					}
 					s.Methods = append(s.Methods, &fs)
 				}

@@ -5,7 +5,6 @@ package example
 import (
 	"github.com/siddhesh-tamhanekar/di"
 	"github.com/siddhesh-tamhanekar/di/example/another/"
-	"github.com/siddhesh-tamhanekar/di/example/another/b"
 )
 
 func NewUserHandler() UserHandler {
@@ -17,7 +16,7 @@ func build() {
 	di.Singleton(Redis{}, NewRedis())
 
 	di.Build(UserHandler{})
-	di.Build(b.B1{})
+	// di.Build(b.B1{})
 	di.Build(Simple{})
 	di.Build(FooService{})
 	di.Bind(Notification, map[string]any{
